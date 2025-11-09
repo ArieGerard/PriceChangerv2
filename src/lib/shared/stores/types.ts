@@ -12,4 +12,8 @@ export type ColumnMapping = {
     index: number;
 };
 
-export type MappingConfig = Record<string, ColumnMapping> | null;
+export type MappingConfig = {
+    MPN: ColumnMapping;
+    Cost: ColumnMapping;
+    'Unit Divider'?: ColumnMapping;
+} | null
