@@ -1,10 +1,13 @@
 import * as XLSX from 'xlsx';
 
+// Function to read the excel file. Takes in a default ts type for File. Uses a promise to return a structure of headers and rows. 
 export async function readExcelFile(file: File): Promise<{ headers: string[]; rows: any[][] }> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader(); 
+        // similar to a callback though i use this because i can handle the result when its ready
         reader.onload = (e) => {
           try {
+            // check for file data 
             if (!e.target?.result) {
                 reject(new Error('Failed to read file: no data'));
                 return;

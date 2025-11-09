@@ -30,7 +30,10 @@ export {
     mapCompanyFile,
     clearVendorMapping,
     clearCompanyMapping,
-    clearAll
+    clearAll,
+    matchedItems,
+    setMatchedItems,
+    orphanedItems
 } from './mapping';
 
 // Search store

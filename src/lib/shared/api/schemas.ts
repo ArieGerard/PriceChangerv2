@@ -5,7 +5,7 @@ export const VendorRowSchema = z.object({
     MPN: z.union([z.string(), z.number()]),
     Cost: z.number().positive("Cost must be positive"),
     UnitDivider: z.number().positive().nullable().optional(),
-}).passthrough(); // Allow additional columns
+}).catchall(z.any()); // Allow additional columns
 
 // Company/QuickBooks row
 export const CompanyRowSchema = z.object({
@@ -16,7 +16,7 @@ export const CompanyRowSchema = z.object({
     Cost: z.number().nonnegative("Cost cannot be negative"),
     Price: z.number().nonnegative("Price cannot be negative"),
     'U/M': z.string().optional(),
-}).passthrough();
+}).catchall(z.any());
 
 // Inferred types
 export type VendorRow = z.infer<typeof VendorRowSchema>;

@@ -1,16 +1,18 @@
 <script lang="ts">
-    import { vendorData } from "./shared/stores";
+    import { mapCompanyFile, vendorData } from "./shared/stores";
     import type { MappingConfig } from "./shared/stores/types";
-    
-    $: vendorHeaders = vendorData.headers || [];
-    $: previewVendorRows = vendorData.rows || [];
+
+    let vendorHeaders = $derived(vendorData.headers || []);
+    let previewVendorRows = $derived(vendorData.rows || []);
+
 
     let requiredColumns = ["MPN", "Cost"];
     let optionalColumns = ["Unit Divider"];
     let bulkPricing;
 
-    export let onConfirmed = (mapping: MappingConfig) => {};
-    export let onCancel = () => {};
+    // Use this for UI logic
+    let { onConfirmed = (mappping: MappingConfig) => {}, 
+    onCancel = () => {} } = $props();
 
     let selections: Record<string, number | null> = {
         MPN: null,
@@ -23,12 +25,7 @@
         "Unit Divider": false
     };
 
-    // make sure that all the required sections are selected
-    $: allRequiredSelected = requiredColumns.every(
-        (col) => selections[col] !== null,
-    );
-   
-    $: canConfirm = (() => {
+    let canConfirm = $derived.by(() => {
         if (selections["MPN"] === null) return false;
         if (selections["Cost"] === null) return false;
 
@@ -39,8 +36,9 @@
             return false;
         }
         return true;
-    })();
-
+    })
+   
+   
     function selectColumn(columnType: string, headerIndex: number | null) {
         selections[columnType] = headerIndex;
     }
@@ -66,6 +64,9 @@
                 };
             }
         }
+        // Store the mapping to the mapping store through mapCompany File
+        mapCompanyFile(mapping);
+        // Use this for closing the moodal after its confirmed
         onConfirmed(mapping);
     }
 
