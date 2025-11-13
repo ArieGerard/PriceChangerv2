@@ -55,19 +55,7 @@
     }
 
     function handleConfirm() {
-        const mapping: MappingConfig = {};
-        for (const [columnType, headerIndex] of Object.entries(selections)) {
-            if (headerIndex !== null) {
-                mapping[columnType] = {
-                    name: vendorHeaders[headerIndex],
-                    index: headerIndex
-                };
-            }
-        }
-        // Store the mapping to the mapping store through mapCompany File
-        mapCompanyFile(mapping);
-        // Use this for closing the moodal after its confirmed
-        onConfirmed(mapping);
+        
     }
 
     function handleCancel() {
