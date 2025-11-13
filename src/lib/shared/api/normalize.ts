@@ -18,6 +18,7 @@ export function normalizeVendorRow(row: any[], mapping: MappingConfig) {
     };
     
     return VendorRowSchema.parse(raw);
+    
 }
 
 /**

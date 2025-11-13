@@ -4,6 +4,7 @@ import { clearVendorFile } from './vendor';
 import { clearCompanyFile } from './company';
 import type { MatchedItem } from '../api/match';
 
+
 class MappingStore {
     vendorMapping = $state<MappingConfig>(null);
     companyMapping = $state<MappingConfig>(null);
