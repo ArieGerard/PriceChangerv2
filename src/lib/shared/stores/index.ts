@@ -1,43 +1,8 @@
-// Central export point for all stores
-// Barrel export pattern for clean imports
 
-// Types
 export type { FileData, ColumnMapping, MappingConfig } from './types';
 
-// Vendor store
-export {
-    vendorData,
-    setVendorFile,
-    clearVendorFile,
-    filteredVendorRows
-} from './vendor';
-
-// Company store
-export {
-    companyData,
-    setCompanyFile,
-    clearCompanyFile,
-    filteredCompanyRows
-} from './company';
-
-// Mapping store
-export {
-    vendorMapping,
-    companyMapping,
-    isMapped,
-    setIsMapped,
-    mapVendorFile,
-    mapCompanyFile,
-    clearVendorMapping,
-    clearCompanyMapping,
-    clearAll,
-    matchedItems,
-    setMatchedItems,
-    orphanedItems
-} from './mapping';
-
-// Search store
-export {
-    vendorSearchTerm,
-    companySearchTerm
-} from './search';
+// Store instances - single source of truth
+export { searchStore } from './search.svelte';
+export { vendorStore } from './vendor.svelte';
+export { companyStore } from './company.svelte';
+export { mappingStore } from './mapping.svelte';

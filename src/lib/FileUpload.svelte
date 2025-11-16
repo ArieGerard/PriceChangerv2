@@ -1,6 +1,6 @@
 <script lang="ts">
     import { readExcelFile } from './shared/api/excel';
-    import { setIsMapped, setCompanyFile, setVendorFile } from './shared/stores';
+    import { vendorStore, companyStore, mappingStore } from './shared/stores';
     // State variables
     let file: File | null = null;
     let currentFileType: 'vendor' | 'company' = 'vendor';
@@ -114,10 +114,10 @@
             // Set data based on file type
             if (currentFileType === 'vendor') {
                 // Reset isMapped to false when uploading new vendor file
-                setIsMapped(false);
-                setVendorFile(result, file.name, file);
+                mappingStore.setIsMapped(false);
+                vendorStore.setFile(result, file.name, file);
             } else {
-                setCompanyFile(result, file.name, file);
+                companyStore.setFile(result, file.name, file);
             }
 
             // Set success message based on file type
