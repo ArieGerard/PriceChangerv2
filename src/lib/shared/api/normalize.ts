@@ -6,6 +6,7 @@ import type { MappingConfig } from '../stores/types';
  */
 export function normalizeVendorRow(row: any[], mapping: MappingConfig) {
     if (!mapping) {
+        console.error('[NormalizeAPI] normalizeVendorRow called without mapping');
         throw new Error('Mapping configuration is required');
     }
     
@@ -17,8 +18,12 @@ export function normalizeVendorRow(row: any[], mapping: MappingConfig) {
             : null,
     };
     
-    return VendorRowSchema.parse(raw);
-    
+    try {
+        return VendorRowSchema.parse(raw);
+    } catch (error) {
+        console.error('[NormalizeAPI] Row validation failed:', error, 'Raw data:', raw);
+        throw error;
+    }
 }
 
 /**

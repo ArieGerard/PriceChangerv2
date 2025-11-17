@@ -10,7 +10,7 @@
     let bulkPricing;
 
     // Use this for UI logic
-    let { onConfirmed = (mappping: MappingConfig) => {}, onCancel = () => {} } =
+    let { onConfirmed = (mapping: MappingConfig) => {}, onCancel = () => {} } =
         $props();
 
     let selections: Record<string, number | null> = {
@@ -54,8 +54,11 @@
 
     function handleConfirm() {
         if (!canConfirm) {
+            console.warn('[ColumnSelector] Cannot confirm - required columns not selected');
             return;
         }
+        
+        console.log('[ColumnSelector] Mapping confirmation started');
         const mapping: MappingConfig = {
             MPN: {
                 name: vendorHeaders[selections.MPN!],
@@ -74,11 +77,27 @@
             };
         }
 
+        console.log('[ColumnSelector] Mapping created:', {
+            MPN: mapping.MPN.name,
+            Cost: mapping.Cost.name,
+            'Unit Divider': mapping['Unit Divider']?.name || 'not selected'
+        });
+
         mappingStore.mapVendorFile(mapping);
+        console.log('[ColumnSelector] Mapping stored in mappingStore');
+        
         const result = vendorStore.normalizeRows(mapping);
+        console.log(`[ColumnSelector] Row normalization completed: ${result.success} successful, ${result.errors.length} errors`);
+        
+        if (result.errors.length > 0) {
+            console.warn('[ColumnSelector] Normalization errors:', result.errors);
+        }
+        
+        onConfirmed(mapping);
     }
 
     function handleCancel() {
+        console.log('[ColumnSelector] Mapping cancelled by user');
         onCancel();
     }
 </script>

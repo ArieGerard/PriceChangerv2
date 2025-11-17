@@ -15,9 +15,13 @@ export function matchItems(
     companyRows: CompanyRow[],
     vendorRows: VendorRow[]
 ): MatchedItem[] {
-    const vendorLookup = new Map(vendorRows.map(v => [v.MPN, v]));
+    console.log(`[MatchAPI] Starting matching: ${companyRows.length} company rows, ${vendorRows.length} vendor rows`);
+    const startTime = performance.now();
     
-    return companyRows.map(companyRow => {
+    const vendorLookup = new Map(vendorRows.map(v => [v.MPN, v]));
+    console.log(`[MatchAPI] Vendor lookup map created with ${vendorLookup.size} entries`);
+    
+    const matched = companyRows.map(companyRow => {
         const vendorRow = vendorLookup.get(companyRow.MPN) || null;
         
         return {
@@ -30,5 +34,11 @@ export function matchItems(
                 : null,
         };
     });
+    
+    const orphanedCount = matched.filter(item => item.isOrphaned).length;
+    const duration = performance.now() - startTime;
+    console.log(`[MatchAPI] Matching completed in ${duration.toFixed(2)}ms: ${matched.length} items, ${orphanedCount} orphaned`);
+    
+    return matched;
 }
 

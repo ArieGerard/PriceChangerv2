@@ -1,14 +1,16 @@
 <script lang="ts">
     import { readExcelFile } from './shared/api/excel';
     import { vendorStore, companyStore, mappingStore } from './shared/stores';
-    // State variables
+    import ColumnSelector from './ColumnSelector.svelte';
+    import type { MappingConfig } from './shared/stores/types';
+    
     let file: File | null = null;
     let currentFileType: 'vendor' | 'company' = 'vendor';
     let isLoading = false;
     let errorMessage = '';
-    let fileInput: HTMLInputElement; 
+    let fileInput: HTMLInputElement;
+    let showColumnSelector = $state(false);
 
-    // File type configurations
     const fileTypeConfig = {
         vendor: {
             label: 'Vendor File',
@@ -34,27 +36,25 @@
    
 
     export function uploadByFileType(type: 'vendor' | 'company') {
+      console.log(`[FileUpload] Upload initiated for ${type} file`);
       currentFileType = type;
-      file = null; // Clear selected file when switching types
+      file = null;
       errorMessage = '';
       
-      // Trigger file input dialog
       if (fileInput) {
         fileInput.click();
       }
     }
 
-    // Handle file selection
     function handleFileSelect(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
         file = target.files[0];
-        // Automatically parse the file after selection
+        console.log(`[FileUpload] File selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB) for ${currentFileType} file`);
         parseFile();
       }
     }
 
-    // Validation functions
     function validateHeaders(headers: string[], requiredHeaders: string[]): { valid: boolean; message: string } {
         if (!headers || headers.length === 0) {
             return {
@@ -82,20 +82,21 @@
         };
     }
 
-    // File processing
     async function parseFile() {
         if (!file) {
             errorMessage = 'Please select a file first';
+            console.warn('[FileUpload] parseFile called but no file selected');
             return;
         }
 
+        console.log(`[FileUpload] Starting file parsing for ${currentFileType} file: ${file.name}`);
         isLoading = true;
         errorMessage = '';
 
         try {
             const result = await readExcelFile(file);
+            console.log(`[FileUpload] File parsed successfully: ${result.headers.length} headers, ${result.rows.length} rows`);
             
-            // Only validate headers for company files (not vendor files)
             let validation = null;
             if (currentFileType === 'company') {
                 const requiredHeaders = fileTypeConfig[currentFileType].requiredHeaders;
@@ -106,45 +107,79 @@
                 );
 
                 if (!validation.valid) {
+                    console.error(`[FileUpload] Header validation failed: ${validation.message}`);
                     errorMessage = validation.message;
                     return;
                 }
+                console.log(`[FileUpload] Header validation passed for company file`);
             }
 
-            // Set data based on file type
             if (currentFileType === 'vendor') {
-                // Reset isMapped to false when uploading new vendor file
                 mappingStore.setIsMapped(false);
                 vendorStore.setFile(result, file.name, file);
+                console.log(`[FileUpload] Vendor file loaded: ${result.rows.length} rows, ${result.headers.length} columns`);
+                
+                if (fileTypeConfig.vendor.requiresMapping) {
+                    showColumnSelector = true;
+                    console.log('[FileUpload] Showing column selector for vendor file mapping');
+                }
             } else {
                 companyStore.setFile(result, file.name, file);
+                console.log(`[FileUpload] Company file loaded: ${result.rows.length} rows, ${result.headers.length} columns`);
             }
 
-            // Set success message based on file type
             if (currentFileType === 'company' && validation) {
                 errorMessage = validation.message;
+            } else if (currentFileType === 'vendor') {
+                errorMessage = '';
             } else {
                 errorMessage = `${fileTypeConfig[currentFileType].label} loaded successfully`;
             }
+            
+            console.log(`[FileUpload] File upload completed successfully for ${currentFileType} file`);
 
         } catch (error) {
-            console.error('Error parsing file:', error);
-            errorMessage = `Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`[FileUpload] File parsing failed for ${currentFileType} file:`, errorMsg, error);
+            errorMessage = `Failed to parse file: ${errorMsg}`;
         } finally {
             isLoading = false;
         }
     }
+
+    function handleMappingConfirmed(mapping: MappingConfig) {
+        console.log('[FileUpload] Mapping confirmed, closing column selector');
+        showColumnSelector = false;
+        errorMessage = `${fileTypeConfig.vendor.label} mapped and loaded successfully`;
+    }
+
+    function handleMappingCancelled() {
+        console.log('[FileUpload] Mapping cancelled by user');
+        showColumnSelector = false;
+    }
 </script>
-
-
-    <!-- Status Messages -->
+    
     {#if errorMessage}
         <div class="message" class:error={errorMessage.includes('Missing') || errorMessage.includes('Failed')}>
             {errorMessage}
         </div>
     {/if}
 
-    <!-- Hidden file input -->
+    <div class="upload-section">
+        <h2>Upload Files</h2>
+        <div class="button-group">
+            <button on:click={() => uploadByFileType('vendor')}>
+                Upload Vendor File
+            </button>
+            <button on:click={() => uploadByFileType('company')}>
+                Upload Company File
+            </button>
+        </div>
+        {#if isLoading}
+            <p>Loading...</p>
+        {/if}
+    </div>
+
     <input 
         type="file" 
         accept=".xlsx,.xls" 
@@ -153,12 +188,18 @@
         style="display: none;"
     />
 
-    <!-- File Info -->
     {#if file}
         <div class="file-info">
             <p><strong>Selected:</strong> {file.name}</p>
             <p><strong>Size:</strong> {(file.size / 1024).toFixed(1)} KB</p>
         </div>
+    {/if}
+
+    {#if showColumnSelector}
+        <ColumnSelector 
+            onConfirmed={handleMappingConfirmed}
+            onCancel={handleMappingCancelled}
+        />
     {/if}
 
 <style>

@@ -39,12 +39,10 @@ export class BaseFileStore {
         this.data.filename = null;
     }
 
-    filteredRows(searchTerm: string) {
-        return $derived.by(() => {
-            if (!this.data.rows) return [];
-            return this.data.rows.filter(row =>
-                row.some(cell => cell?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
-            );
-        });
+    filteredRows(searchTerm : string): any[][] {
+        if (!this.data.rows) return [];
+        return this.data.rows.filter(row =>
+            row.some(cell => cell?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+        );
     }
 }
