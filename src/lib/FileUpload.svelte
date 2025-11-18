@@ -168,10 +168,10 @@
     <div class="upload-section">
         <h2>Upload Files</h2>
         <div class="button-group">
-            <button on:click={() => uploadByFileType('vendor')}>
+            <button onclick={() => uploadByFileType('vendor')}>
                 Upload Vendor File
             </button>
-            <button on:click={() => uploadByFileType('company')}>
+            <button onclick={() => uploadByFileType('company')}>
                 Upload Company File
             </button>
         </div>
@@ -184,7 +184,7 @@
         type="file" 
         accept=".xlsx,.xls" 
         bind:this={fileInput}
-        on:change={handleFileSelect}
+        onchange={handleFileSelect}
         style="display: none;"
     />
 

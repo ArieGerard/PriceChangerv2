@@ -23,7 +23,6 @@ class CompanyStore extends BaseFileStore {
     }
 
     normalizeRows(): { success: number; errors: Array<{ row: number; error: string }> } {
-        // Use the generic helper - pass company-specific logic
         const result = this.normalizeRowsGeneric<CompanyRow>(
             (row) => normalizeCompanyRow(row, this.headers),
             'CompanyStore'

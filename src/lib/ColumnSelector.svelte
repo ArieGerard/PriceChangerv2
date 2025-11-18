@@ -103,8 +103,8 @@
 </script>
 
 <!-- Modal Backdrop -->
-<div class="modal-backdrop" on:click={handleCancel}>
-    <div class="modal-container" on:click|stopPropagation>
+<div class="modal-backdrop" onclick={handleCancel}>
+    <div class="modal-container">
         <!-- Header -->
         <header class="modal-header">
             <div>
@@ -113,7 +113,7 @@
             </div>
             <button
                 class="close-btn"
-                on:click={handleCancel}
+                onclick={handleCancel}
                 aria-label="Close"
             >
                 ✕
@@ -156,7 +156,7 @@
                         <input
                             type="checkbox"
                             checked={enabledOption[columnType]}
-                            on:change={() => toggleOptional(columnType)}
+                            onchange={() => toggleOptional(columnType)}
                         />
                         <strong>{columnType}:</strong>
                     </label>
@@ -186,7 +186,7 @@
                                         "Unit Divider",
                                         i,
                                     )}
-                                    on:click={() => {
+                                    onclick={() => {
                                         // Smart selection - picks first unselected required field
                                         if (selections.MPN === null) {
                                             selectColumn("MPN", i);
@@ -263,11 +263,11 @@
 
         <!-- Footer Actions -->
         <footer class="modal-footer">
-            <button class="btn-cancel" on:click={handleCancel}> Cancel </button>
+            <button class="btn-cancel" onclick={handleCancel}> Cancel </button>
             <button
                 class="btn-confirm"
                 disabled={!canConfirm}
-                on:click={handleConfirm}
+                onclick={handleConfirm}
             >
                 {canConfirm ? "✓ Confirm Selection" : "Select Required Columns"}
             </button>
