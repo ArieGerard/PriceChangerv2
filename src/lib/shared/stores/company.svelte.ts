@@ -16,6 +16,7 @@ class CompanyStore extends BaseFileStore {
     clearFile() {
         console.log('[CompanyStore] Clearing company file');
         super.clearFile();
+        this.normalizedRows = [];
     }
 
     filteredRows() {
