@@ -11,7 +11,7 @@ class VendorStore extends BaseFileStore {
     setFile(data: { headers: string[]; rows: any[][] }, filename: string, file: File | null = null) {
         console.log(`[VendorStore] Setting file: ${filename} (${data.rows.length} rows, ${data.headers.length} headers)`);
         super.setFile(data, filename, file);
-        this.normalizedRows.length = 0;
+        this.normalizedRows = [];
         console.log('[VendorStore] Normalized rows cleared');
     }
 
@@ -19,45 +19,22 @@ class VendorStore extends BaseFileStore {
     clearFile() {
         console.log('[VendorStore] Clearing vendor file and normalized rows');
         super.clearFile();
-        this.normalizedRows.length = 0;
+        this.normalizedRows = [];
     }
 
     normalizeRows(mapping: MappingConfig): { success: number; errors: Array<{ row: number; error: string }> } {
-        console.log(`[VendorStore] Starting row normalization for ${this.data.rows?.length || 0} rows`);
-        
-        if (!this.data.rows || !mapping) {
-            console.warn('[VendorStore] Cannot normalize: missing rows or mapping');
-            this.normalizedRows.length = 0;
+        if (!mapping) {
+            console.warn('[VendorStore] Cannot normalize: missing mapping');
+            this.normalizedRows = [];
             return { success: 0, errors: [] };
         }
 
-        const normalized: VendorRow[] = [];
-        const errors: Array<{ row: number; error: string }> = [];
-        const startTime = performance.now();
+        const { normalized, errors } = this.normalizeRowsGeneric<VendorRow>(
+            (row) => normalizeVendorRow(row, mapping),
+            'VendorStore'
+        );
 
-        this.data.rows.forEach((row, index) => {
-            try {
-                const normalizedRow = normalizeVendorRow(row, mapping);
-                normalized.push(normalizedRow);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                console.error(`[VendorStore] Row ${index + 1} failed validation:`, errorMessage);
-                errors.push({
-                    row: index + 1,
-                    error: errorMessage,
-                });
-            }
-        });
-
-        this.normalizedRows.length = 0;
-        this.normalizedRows.push(...normalized);
-        const duration = performance.now() - startTime;
-
-        console.log(`[VendorStore] Normalization completed in ${duration.toFixed(2)}ms: ${normalized.length} successful, ${errors.length} errors`);
-
-        if (errors.length > 0) {
-            console.warn(`[VendorStore] ${errors.length} rows failed validation out of ${this.data.rows.length} total rows`);
-        }
+        this.normalizedRows = normalized;
         
         return { success: normalized.length, errors };
     }
