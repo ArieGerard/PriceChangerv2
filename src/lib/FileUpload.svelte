@@ -118,22 +118,28 @@
                 mappingStore.setIsMapped(false);
                 vendorStore.setFile(result, file.name, file);
                 console.log(`[FileUpload] Vendor file loaded: ${result.rows.length} rows, ${result.headers.length} columns`);
-                
+
                 if (fileTypeConfig.vendor.requiresMapping) {
                     showColumnSelector = true;
                     console.log('[FileUpload] Showing column selector for vendor file mapping');
                 }
-            } else {
-                companyStore.setFile(result, file.name, file);
-                console.log(`[FileUpload] Company file loaded: ${result.rows.length} rows, ${result.headers.length} columns`);
-            }
-
-            if (currentFileType === 'company' && validation) {
-                errorMessage = validation.message;
-            } else if (currentFileType === 'vendor') {
                 errorMessage = '';
             } else {
-                errorMessage = `${fileTypeConfig[currentFileType].label} loaded successfully`;
+                // Company file - load and auto-normalize
+                companyStore.setFile(result, file.name, file);
+                console.log(`[FileUpload] Company file loaded: ${result.rows.length} rows, ${result.headers.length} columns`);
+
+                console.log('[FileUpload] Starting automatic normalization for company file');
+                const normalizeResult = companyStore.normalizeRows();
+
+                if (normalizeResult.errors.length > 0) {
+                    const errorCount = normalizeResult.errors.length;
+                    errorMessage = `${normalizeResult.success} rows normalized successfully, ${errorCount} rows failed validation`;
+                    console.warn(`[FileUpload] Company normalization completed with errors:`, normalizeResult.errors);
+                } else {
+                    console.log(`[FileUpload] Company normalization completed: ${normalizeResult.success} rows normalized successfully`);
+                    errorMessage = `Company file loaded and normalized successfully (${normalizeResult.success} rows)`;
+                }
             }
             
             console.log(`[FileUpload] File upload completed successfully for ${currentFileType} file`);
@@ -203,6 +209,44 @@
     {/if}
 
 <style>
+    .upload-section {
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 20px;
+    }
+
+    .upload-section h2 {
+        margin: 0 0 16px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 12px;
+    }
+
+    button {
+        padding: 12px 24px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
     .message {
         padding: 10px;
         border-radius: 6px;
@@ -223,12 +267,10 @@
         background: #f8fafc;
         border-radius: 6px;
         font-size: 14px;
+        margin-top: 15px;
     }
 
     .file-info p {
         margin: 5px 0;
     }
 </style>
-
-
-

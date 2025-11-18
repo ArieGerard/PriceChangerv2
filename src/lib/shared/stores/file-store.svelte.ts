@@ -1,4 +1,3 @@
-import { normalize } from "zod";
 import type { FileData } from "./types";
 
 export class BaseFileStore {
