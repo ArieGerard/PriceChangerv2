@@ -46,10 +46,6 @@ export class BaseFileStore {
         );
     }
 
-    getOrphanedItems(){
-        this.return 
-    }
-
     protected normalizeRowsGeneric<T>(
         normalize: (row: any[], index: number) => T,
         storeName: string
