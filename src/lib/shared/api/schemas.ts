@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 // Vendor file row (after column mapping)
 export const VendorRowSchema = z.object({
-    MPN: z.union([z.string(), z.number()]),
-    Cost: z.number().positive("Cost must be positive"),
+    MPN: z.union([z.string(), z.number()]).nullable().optional(),
+    Cost: z.number().nonnegative("Cost cannot be negative").nullable().optional(),
     UnitDivider: z.number().positive().nullable().optional(),
 }).catchall(z.any()); // Allow additional columns
 
