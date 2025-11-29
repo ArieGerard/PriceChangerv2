@@ -12,15 +12,15 @@
     let { onConfirmed = (mapping: MappingConfig) => {}, onCancel = () => {} } =
         $props();
 
-    let selections: Record<string, number | null> = {
+    let selections = $state<Record<string, number | null>>({
         MPN: null,
         Cost: null,
         "Unit Divider": null,
-    };
+    });
 
-    let enabledOption: Record<string, boolean> = {
+    let enabledOption = $state<Record<string, boolean>>({
         "Unit Divider": false,
-    };
+    });
 
     let canConfirm = $derived.by(() => {
         if (selections["MPN"] === null) return false;
@@ -100,6 +100,10 @@
     }
 
     function handleColumnClick(columnIndex: number) {
+<<<<<<< HEAD
+=======
+        console.log('[ColumnSelector] Column clicked:', columnIndex);
+>>>>>>> a4142ff8089d38aeea03cdf46e13968280a8d9f7
         // Smart selection - picks first unselected required field
         if (selections.MPN === null) {
             selectColumn("MPN", columnIndex);
@@ -126,7 +130,10 @@
     }
 
     function handleBackdropClick(e: MouseEvent) {
+<<<<<<< HEAD
         // Only close if clicking the backdrop itself, not its children
+=======
+>>>>>>> a4142ff8089d38aeea03cdf46e13968280a8d9f7
         if (e.target === e.currentTarget) {
             handleCancel();
         }
@@ -141,7 +148,11 @@
     aria-modal="true"
     aria-labelledby="modal-title"
 >
+<<<<<<< HEAD
     <div class="modal-container">
+=======
+    <div class="modal-container" onclick={(e) => e.stopPropagation()}>
+>>>>>>> a4142ff8089d38aeea03cdf46e13968280a8d9f7
         <!-- Header -->
         <header class="modal-header">
             <div>
@@ -220,7 +231,14 @@
                                     class:selected-mpn={isSelected("MPN", i)}
                                     class:selected-cost={isSelected("Cost", i)}
                                     class:selected-unit={isSelected("Unit Divider", i)}
+<<<<<<< HEAD
                                     onclick={() => handleColumnClick(i)}
+=======
+                                    onclick={(e) => {
+                                        e.stopPropagation();
+                                        handleColumnClick(i);
+                                    }}
+>>>>>>> a4142ff8089d38aeea03cdf46e13968280a8d9f7
                                 >
                                     <div class="header-content">
                                         <span class="header-text">{header}</span>
