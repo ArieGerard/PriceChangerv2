@@ -7,7 +7,6 @@
 
     let requiredColumns = ["MPN", "Cost"];
     let optionalColumns = ["Unit Divider"];
-    let bulkPricing;
 
     // Use this for UI logic
     let { onConfirmed = (mapping: MappingConfig) => {}, onCancel = () => {} } =
@@ -20,7 +19,6 @@
     };
 
     let enabledOption: Record<string, boolean> = {
-        bulkPricing: false,
         "Unit Divider": false,
     };
 
@@ -100,21 +98,60 @@
         console.log('[ColumnSelector] Mapping cancelled by user');
         onCancel();
     }
+
+    function handleColumnClick(columnIndex: number) {
+        // Smart selection - picks first unselected required field
+        if (selections.MPN === null) {
+            selectColumn("MPN", columnIndex);
+        } else if (selections.Cost === null) {
+            selectColumn("Cost", columnIndex);
+        } else if (
+            enabledOption["Unit Divider"] &&
+            selections["Unit Divider"] === null
+        ) {
+            selectColumn("Unit Divider", columnIndex);
+        } else {
+            // Allow deselection by clicking same column again
+            if (isSelected("MPN", columnIndex)) {
+                selectColumn("MPN", null);
+            } else if (isSelected("Cost", columnIndex)) {
+                selectColumn("Cost", null);
+            } else if (isSelected("Unit Divider", columnIndex)) {
+                selectColumn("Unit Divider", null);
+            } else {
+                // Default to MPN if clicking a different column
+                selectColumn("MPN", columnIndex);
+            }
+        }
+    }
+
+    function handleBackdropClick(e: MouseEvent) {
+        // Only close if clicking the backdrop itself, not its children
+        if (e.target === e.currentTarget) {
+            handleCancel();
+        }
+    }
 </script>
 
 <!-- Modal Backdrop -->
-<div class="modal-backdrop" onclick={handleCancel}>
+<div
+    class="modal-backdrop"
+    onclick={handleBackdropClick}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+>
     <div class="modal-container">
         <!-- Header -->
         <header class="modal-header">
             <div>
-                <h2>Select Columns</h2>
+                <h2 id="modal-title">Select Columns</h2>
                 <p>Map your Excel columns to the required fields</p>
             </div>
             <button
                 class="close-btn"
                 onclick={handleCancel}
-                aria-label="Close"
+                aria-label="Close dialog"
             >
                 ✕
             </button>
@@ -182,41 +219,11 @@
                                 <th
                                     class:selected-mpn={isSelected("MPN", i)}
                                     class:selected-cost={isSelected("Cost", i)}
-                                    class:selected-unit={isSelected(
-                                        "Unit Divider",
-                                        i,
-                                    )}
-                                    onclick={() => {
-                                        // Smart selection - picks first unselected required field
-                                        if (selections.MPN === null) {
-                                            selectColumn("MPN", i);
-                                        } else if (selections.Cost === null) {
-                                            selectColumn("Cost", i);
-                                        } else if (
-                                            enabledOption["Unit Divider"] &&
-                                            selections["Unit Divider"] === null
-                                        ) {
-                                            selectColumn("Unit Divider", i);
-                                        } else {
-                                            // Allow re-selection
-                                            if (isSelected("MPN", i))
-                                                selectColumn("MPN", null);
-                                            else if (isSelected("Cost", i))
-                                                selectColumn("Cost", null);
-                                            else if (
-                                                isSelected("Unit Divider", i)
-                                            )
-                                                selectColumn(
-                                                    "Unit Divider",
-                                                    null,
-                                                );
-                                            else selectColumn("MPN", i); // Default to MPN
-                                        }
-                                    }}
+                                    class:selected-unit={isSelected("Unit Divider", i)}
+                                    onclick={() => handleColumnClick(i)}
                                 >
                                     <div class="header-content">
-                                        <span class="header-text">{header}</span
-                                        >
+                                        <span class="header-text">{header}</span>
                                         {#if isSelected("MPN", i)}
                                             <span class="tag mpn">MPN</span>
                                         {/if}
@@ -224,9 +231,7 @@
                                             <span class="tag cost">Cost</span>
                                         {/if}
                                         {#if isSelected("Unit Divider", i)}
-                                            <span class="tag unit"
-                                                >Unit Divider</span
-                                            >
+                                            <span class="tag unit">Unit Divider</span>
                                         {/if}
                                     </div>
                                 </th>
@@ -238,18 +243,9 @@
                             <tr>
                                 {#each row as cell, i}
                                     <td
-                                        class:selected-mpn={isSelected(
-                                            "MPN",
-                                            i,
-                                        )}
-                                        class:selected-cost={isSelected(
-                                            "Cost",
-                                            i,
-                                        )}
-                                        class:selected-unit={isSelected(
-                                            "Unit Divider",
-                                            i,
-                                        )}
+                                        class:selected-mpn={isSelected("MPN", i)}
+                                        class:selected-cost={isSelected("Cost", i)}
+                                        class:selected-unit={isSelected("Unit Divider", i)}
                                     >
                                         {cell ?? ""}
                                     </td>
