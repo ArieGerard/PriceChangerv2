@@ -4,10 +4,10 @@ import * as XLSX from 'xlsx';
 export async function readExcelFile(file: File): Promise<{ headers: string[]; rows: any[][] }> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader(); 
-        // similar to a callback though i use this because i can handle the result when its ready
+        // Similar to a callback though I use this because I can handle the result when its ready
         reader.onload = (e) => {
           try {
-            // check for file data 
+            // Check for file data 
             if (!e.target?.result) {
                 reject(new Error('Failed to read file: no data'));
                 return;
