@@ -1,5 +1,6 @@
 import type { VendorRow, CompanyRow } from './schemas';
 
+// Extract
 export type MatchedItem = {
     MPN: string | number;
     companyRow: CompanyRow;
@@ -21,7 +22,7 @@ export function matchItems(
     const vendorLookup = new Map(vendorRows.map(v => [v.MPN, v]));
     console.log(`[MatchAPI] Vendor lookup map created with ${vendorLookup.size} entries`);
     
-    const matched = companyRows.map(companyRow => {
+    const matchedRows = companyRows.map(companyRow => {
         const vendorRow = vendorLookup.get(companyRow.MPN) || null;
         
         return {
@@ -35,10 +36,14 @@ export function matchItems(
         };
     });
     
-    const orphanedCount = matched.filter(item => item.isOrphaned).length;
+    // Get the orhaned count for UI 
+    const orphanedCount = matchedRows.filter(item => item.isOrphaned).length;
+
+    // Log performance metrics, will be logging the time it takes 
     const duration = performance.now() - startTime;
-    console.log(`[MatchAPI] Matching completed in ${duration.toFixed(2)}ms: ${matched.length} items, ${orphanedCount} orphaned`);
+    console.log(`[MatchAPI] Matching completed in ${duration.toFixed(2)}ms: ${matchedRows.length} items, ${orphanedCount} orphaned`);
     
-    return matched;
+    // Return Matched 
+    return matchedRows;
 }
 
