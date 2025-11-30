@@ -1,16 +1,16 @@
-
 import type { FileData } from './types';
 import { searchStore } from './search.svelte';
 import { BaseFileStore } from './file-store.svelte';
-import { normalizeCompanyRow } from '../api/normalize';
+import { processCompanyRows } from '../processors/company-processor';
 import type { CompanyRow } from '../api/schemas';
 
 class CompanyStore extends BaseFileStore {
+    normalizedRows = $state<CompanyRow[]>([]);
     
-    normalizedRows = $state<CompanyRow[]>([]);  
     setFile(data: { headers: string[]; rows: any[][] }, filename: string, file: File | null = null) {
         console.log(`[CompanyStore] Setting file: ${filename} (${data.rows.length} rows, ${data.headers.length} headers)`);
         super.setFile(data, filename, file);
+        this.normalizedRows = [];
     }
 
     clearFile() {
@@ -24,15 +24,15 @@ class CompanyStore extends BaseFileStore {
     }
 
     normalizeRows(): { success: number; errors: Array<{ row: number; error: string }> } {
-        const result = this.normalizeRowsGeneric<CompanyRow>(
-            (row) => normalizeCompanyRow(row, this.headers),
-            'CompanyStore'
-        );
+        if (!this.data.rows || !this.data.headers) {
+            console.warn('[CompanyStore] Cannot normalize: no rows or headers loaded');
+            return { success: 0, errors: [] };
+        }
 
-        // Update state
-        this.normalizedRows = result.normalized;
+        const { normalized, errors } = processCompanyRows(this.data.rows, this.data.headers);
+        this.normalizedRows = normalized;
         
-        return { success: result.normalized.length, errors: result.errors };
+        return { success: normalized.length, errors };
     }
 }
 
