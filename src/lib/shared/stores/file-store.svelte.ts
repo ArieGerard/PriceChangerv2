@@ -45,47 +45,4 @@ export class BaseFileStore {
             row.some(cell => cell?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
         );
     }
-
-    protected normalizeRowsGeneric<T>(
-        normalize: (row: any[], index: number) => T,
-        storeName: string
-    ): { 
-        normalized: T[]; 
-        errors: Array<{ row: number; error: string }> 
-    } {
-        console.log(`[${storeName}] Starting row normalization for ${this.data.rows?.length || 0} rows`);
-        
-        if (!this.data.rows) {
-            console.warn(`[${storeName}] Cannot normalize: no rows loaded`);
-            return { normalized: [], errors: [] };
-        }
-
-        const normalized: T[] = [];
-        const errors: Array<{ row: number; error: string }> = [];
-        const startTime = performance.now();
-
-        this.data.rows.forEach((row, index) => {
-            try {
-                const normalizedRow = normalize(row, index);
-                normalized.push(normalizedRow);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                console.error(`[${storeName}] Row ${index + 1} failed validation:`, errorMessage);
-                errors.push({
-                    row: index + 1,
-                    error: errorMessage,
-                });
-            }
-        });
-
-        const duration = performance.now() - startTime;
-        console.log(`[${storeName}] Normalization completed in ${duration.toFixed(2)}ms: ${normalized.length} successful, ${errors.length} errors`);
-
-        if (errors.length > 0) {
-            console.warn(`[${storeName}] ${errors.length} rows failed validation out of ${this.data.rows.length} total rows`);
-        }
-        
-        return { normalized, errors };
-    }
-
 }
