@@ -57,51 +57,7 @@ class CompanyProcessor extends BaseProcessor<CompanyRowRaw, CompanyRow> {
      * @throws {Error} If the row fails schema validation.
      */
     protected validateRaw(raw: any, rowIndex: number): CompanyRowRaw {
-        // Validate MPN exists
-        if (raw.MPN === null || raw.MPN === undefined || raw.MPN === '') {
-            throw new Error(`[Row ${rowIndex + 1}] MPN is required but was empty or missing`);
-        }
-
-        // Validate Item exists
-        if (!raw.Item || (typeof raw.Item === 'string' && raw.Item.trim() === '')) {
-            throw new Error(`[Row ${rowIndex + 1}] Item name is required but was empty or missing`);
-        }
-
-        // Parse and validate Cost
-        const cost = this.parseNumber(raw.Cost);  // ← Using inherited parseNumber!
-        if (cost === null) {
-            throw new Error(
-                `[Row ${rowIndex + 1}] Cost value "${raw.Cost}" (type: ${typeof raw.Cost}) could not be converted to a number`
-            );
-        }
-        if (cost < 0) {
-            throw new Error(`[Row ${rowIndex + 1}] Cost cannot be negative, got: ${cost}`);
-        }
-
-        // Parse and validate Price
-        const price = this.parseNumber(raw.Price);  // ← Using inherited parseNumber!
-        if (price === null) {
-            throw new Error(
-                `[Row ${rowIndex + 1}] Price value "${raw.Price}" (type: ${typeof raw.Price}) could not be converted to a number`
-            );
-        }
-        if (price < 0) {
-            throw new Error(`[Row ${rowIndex + 1}] Price cannot be negative, got: ${price}`);
-        }
-
-        // Build validated object
-        const validated = {
-            MPN: raw.MPN,
-            Item: String(raw.Item).trim(),
-            Description: raw.Description || null,
-            PreferredVendor: raw.PreferredVendor || null,
-            Cost: cost,
-            Price: price,
-            'U/M': raw['U/M'] || null,
-        };
-
-        // Validate with raw schema
-        const result = CompanyRowRawSchema.safeParse(validated);
+        const result = CompanyRowRawSchema.safeParse(raw);
         
         if (!result.success) {
             const errors = result.error.errors.map(e => 
@@ -109,12 +65,8 @@ class CompanyProcessor extends BaseProcessor<CompanyRowRaw, CompanyRow> {
             ).join(', ');
             
             throw new Error(
-                `[Row ${rowIndex + 1}] Row validation failed:\n` +
-                `  MPN: ${validated.MPN}\n` +
-                `  Item: ${validated.Item}\n` +
-                `  Cost: ${validated.Cost}\n` +
-                `  Price: ${validated.Price}\n` +
-                `  Errors: ${errors}`
+                `[Row ${rowIndex + 1}] Validation failed: ${errors}\n` +
+                `  Raw data: ${JSON.stringify(raw)}`
             );
         }
         
