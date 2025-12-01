@@ -1,3 +1,4 @@
+// Pull this out to a generic class using polymorphism
 import type { MappingConfig } from '../stores/types';
 import type { VendorRow } from '../api/schemas';
 import { VendorRowSchema, VendorRowRawSchema } from '../api/schemas';
