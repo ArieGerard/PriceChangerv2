@@ -13,8 +13,8 @@ export const VendorRowRawSchema = z.object({
     UnitDivider: z.number().positive().nullable(),
 });
 
-/** 
-* Final vendor row schema after normalization  
+/**
+* Final vendor row schema after normalization
 */
 
 export const VendorRowSchema = z.object({
@@ -24,9 +24,7 @@ export const VendorRowSchema = z.object({
     UnitCost: z.number().nonnegative("UnitCost cannot be negative"),
 });
 
-
-
- export const CompanyRowRawSchema = z.object({
+export const CompanyRowRawSchema = z.object({
     MPN: z.union([z.string(), z.number()]).refine(
         (val) => val !== null && val !== undefined && val !== '',
         { message: "MPN is required and cannot be empty" }
@@ -53,11 +51,7 @@ export const CompanyRowSchema = z.object({
 }).catchall(z.any());
 
 // Inferred types
-
-export type VendorRow = z.infer<typeof VendorRowSchema>;
 export type VendorRowRaw = z.infer<typeof VendorRowRawSchema>;
-
-export type CompanyRow = z.infer<typeof CompanyRowSchema>;
+export type VendorRow = z.infer<typeof VendorRowSchema>;
 export type CompanyRowRaw = z.infer<typeof CompanyRowRawSchema>;
-
-
+export type CompanyRow = z.infer<typeof CompanyRowSchema>;
