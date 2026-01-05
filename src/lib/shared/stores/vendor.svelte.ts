@@ -1,7 +1,7 @@
 import type { MappingConfig } from './types';
 import { searchStore } from './search.svelte';
 import type { VendorRow } from '../api/schemas';
-import { normalizeVendorRow } from '../api/normalize';
+import { processVendorRows } from '../processors/vendor-processor';
 import { BaseFileStore } from './file-store.svelte';
 
 class VendorStore extends BaseFileStore {
@@ -23,17 +23,12 @@ class VendorStore extends BaseFileStore {
     }
 
     normalizeRows(mapping: MappingConfig): { success: number; errors: Array<{ row: number; error: string }> } {
-        if (!mapping) {
-            console.warn('[VendorStore] Cannot normalize: missing mapping');
-            this.normalizedRows = [];
+        if (!this.data.rows) {
+            console.warn('[VendorStore] Cannot normalize: no rows loaded');
             return { success: 0, errors: [] };
         }
 
-        const { normalized, errors } = this.normalizeRowsGeneric<VendorRow>(
-            (row) => normalizeVendorRow(row, mapping),
-            'VendorStore'
-        );
-
+        const { normalized, errors } = processVendorRows(this.data.rows, mapping);
         this.normalizedRows = normalized;
         
         return { success: normalized.length, errors };
